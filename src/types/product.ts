@@ -1,11 +1,10 @@
-
 export interface Product {
   id: string;
   sku: string;
   barcode?: string;
   title: string;
-  material: TileMaterial;
-  finish: TileFinish;
+  material: TileMaterial | ProductMaterial;
+  finish: TileFinish | ProductFinish;
   colour: string;
   pattern?: string;
   batchCode: string;
@@ -14,20 +13,20 @@ export interface Product {
     length: number; // mm
     depth: number; // mm
   };
-  tileWeight: number; // kg
-  tilesPerBox: number;
+  tileWeight: number; // kg (can represent weight per item for non-tiles)
+  tilesPerBox: number; // can represent items per box/pack for non-tiles
   boxDimensions: {
     width: number; // cm
     length: number; // cm
     height: number; // cm
   };
   boxWeight: number; // kg
-  coveragePerTile: number; // m²
-  coveragePerBox: number; // m²
+  coveragePerTile: number; // m² (for tiles) or area/volume per item
+  coveragePerBox: number; // m² (for tiles) or total area/volume per box
   pricing: {
-    pricePerTile: number;
-    pricePerBox: number;
-    pricePerSqm: number;
+    pricePerTile: number; // price per individual item
+    pricePerBox: number; // price per box/pack
+    pricePerSqm: number; // price per square meter (for tiles)
     costPrice: number;
   };
   images: string[];
@@ -35,6 +34,9 @@ export interface Product {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  productType?: 'tile' | 'bath' | 'adhesive' | 'accessory' | 'tool' | 'trim';
+  description?: string;
+  specifications?: Record<string, any>; // Flexible specs for different product types
 }
 
 export type TileMaterial = 
@@ -47,6 +49,21 @@ export type TileMaterial =
   | 'luxury-vinyl'
   | 'mosaic';
 
+export type ProductMaterial = 
+  | 'acrylic'
+  | 'steel'
+  | 'cast-iron'
+  | 'fiberglass'
+  | 'stone-resin'
+  | 'polymer'
+  | 'epoxy'
+  | 'cement-based'
+  | 'silicone'
+  | 'plastic'
+  | 'metal'
+  | 'glass'
+  | 'composite';
+
 export type TileFinish = 
   | 'matte'
   | 'gloss'
@@ -56,6 +73,19 @@ export type TileFinish =
   | 'honed'
   | 'brushed'
   | 'rustic';
+
+export type ProductFinish = 
+  | 'glossy'
+  | 'satin'
+  | 'textured'
+  | 'smooth'
+  | 'rough'
+  | 'brushed'
+  | 'polished'
+  | 'powder-coated'
+  | 'chrome'
+  | 'stainless'
+  | 'painted';
 
 export interface StockLocation {
   id: string;

@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '../components/AppSidebar';
 import { Package, Plus, Search, Filter, Calculator, BarChart3 } from 'lucide-react';
 import { ProductCard } from '../components/inventory/ProductCard';
+import { ProductEditModal } from '../components/inventory/ProductEditModal';
 import { CoverageCalculator } from '../components/inventory/CoverageCalculator';
 import { Product, CoverageCalculation } from '../types/product';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,8 @@ const InventoryPage = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showCalculator, setShowCalculator] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   // Mock data - in real app this would come from API
   const products: Product[] = [
@@ -81,6 +83,8 @@ const InventoryPage = () => {
 
   const handleProductEdit = (product: Product) => {
     console.log('Edit product:', product);
+    setEditingProduct(product);
+    setShowEditModal(true);
   };
 
   const handleProductView = (product: Product) => {
@@ -90,6 +94,18 @@ const InventoryPage = () => {
 
   const handleCalculationComplete = (calculation: CoverageCalculation) => {
     console.log('Coverage calculation:', calculation);
+  };
+
+  const handleProductSave = (product: Product) => {
+    console.log('Saving product:', product);
+    // Here you would typically save to your backend
+    setShowEditModal(false);
+    setEditingProduct(null);
+  };
+
+  const handleAddNewProduct = () => {
+    setEditingProduct(null);
+    setShowEditModal(true);
   };
 
   const filteredProducts = products.filter(product =>
@@ -115,7 +131,7 @@ const InventoryPage = () => {
                   <Calculator className="w-4 h-4 mr-2" />
                   Coverage Calculator
                 </Button>
-                <Button className="bg-blue-600 text-white hover:bg-blue-700">
+                <Button onClick={handleAddNewProduct} className="bg-blue-600 text-white hover:bg-blue-700">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Product
                 </Button>
@@ -213,6 +229,16 @@ const InventoryPage = () => {
           </main>
         </SidebarInset>
       </div>
+
+      <ProductEditModal
+        product={editingProduct}
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingProduct(null);
+        }}
+        onSave={handleProductSave}
+      />
     </SidebarProvider>
   );
 };
