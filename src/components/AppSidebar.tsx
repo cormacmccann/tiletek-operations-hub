@@ -25,6 +25,7 @@ import {
 const navigationItems = [
   { name: 'Dashboard', icon: Package, path: '/' },
   { name: 'Inventory', icon: Package, path: '/inventory' },
+  { name: 'Stock Take', icon: Package, path: '/stocktake' },
   { name: 'Sales', icon: Receipt, path: '/sales' },
   { name: 'POS', icon: ShoppingCart, path: '/pos' },
   { name: 'Delivery', icon: Truck, path: '/delivery' },
