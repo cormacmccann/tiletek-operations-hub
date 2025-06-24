@@ -1,17 +1,102 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '../components/AppSidebar';
-import { Package, Plus, Search, Filter } from 'lucide-react';
+import { Package, Plus, Search, Filter, Calculator, BarChart3 } from 'lucide-react';
+import { ProductCard } from '../components/inventory/ProductCard';
+import { CoverageCalculator } from '../components/inventory/CoverageCalculator';
+import { Product, CoverageCalculation } from '../types/product';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const InventoryPage = () => {
-  const inventoryItems = [
-    { id: 1, name: 'Ceramic Floor Tiles', category: 'Tiles', stock: 150, unit: 'sqm', price: 25.99, status: 'In Stock' },
-    { id: 2, name: 'Porcelain Wall Tiles', category: 'Tiles', stock: 75, unit: 'sqm', price: 35.50, status: 'Low Stock' },
-    { id: 3, name: 'Natural Stone', category: 'Stone', stock: 200, unit: 'sqm', price: 45.00, status: 'In Stock' },
-    { id: 4, name: 'Tile Adhesive', category: 'Adhesives', stock: 50, unit: 'bags', price: 15.99, status: 'In Stock' },
-    { id: 5, name: 'Grout Sealer', category: 'Sealers', stock: 12, unit: 'bottles', price: 8.50, status: 'Critical' },
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showCalculator, setShowCalculator] = useState(false);
+
+  // Mock data - in real app this would come from API
+  const products: Product[] = [
+    {
+      id: '1',
+      sku: 'POR-600-OAK-001',
+      barcode: '1234567890123',
+      title: 'Porcelain Oak Effect Floor Tile',
+      material: 'porcelain',
+      finish: 'matte',
+      colour: 'Oak Brown',
+      pattern: 'Wood Effect',
+      batchCode: 'B2024-001',
+      dimensions: { width: 600, length: 600, depth: 10 },
+      tileWeight: 1.2,
+      tilesPerBox: 4,
+      boxDimensions: { width: 62, length: 62, height: 12 },
+      boxWeight: 5.2,
+      coveragePerTile: 0.36,
+      coveragePerBox: 1.44,
+      pricing: {
+        pricePerTile: 12.50,
+        pricePerBox: 50.00,
+        pricePerSqm: 34.72,
+        costPrice: 30.00
+      },
+      images: [],
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    },
+    {
+      id: '2',
+      sku: 'CER-300-WHT-002',
+      barcode: '1234567890124',
+      title: 'Ceramic White Subway Tile',
+      material: 'ceramic',
+      finish: 'gloss',
+      colour: 'Pure White',
+      batchCode: 'B2024-002',
+      dimensions: { width: 300, length: 100, depth: 8 },
+      tileWeight: 0.4,
+      tilesPerBox: 20,
+      boxDimensions: { width: 32, length: 22, height: 18 },
+      boxWeight: 8.5,
+      coveragePerTile: 0.03,
+      coveragePerBox: 0.6,
+      pricing: {
+        pricePerTile: 2.25,
+        pricePerBox: 45.00,
+        pricePerSqm: 75.00,
+        costPrice: 28.00
+      },
+      images: [],
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
   ];
+
+  const stockData = {
+    '1': { totalBoxes: 25, totalTiles: 3, totalSqm: 37.08, isLowStock: false },
+    '2': { totalBoxes: 8, totalTiles: 12, totalSqm: 5.16, isLowStock: true }
+  };
+
+  const handleProductEdit = (product: Product) => {
+    console.log('Edit product:', product);
+  };
+
+  const handleProductView = (product: Product) => {
+    setSelectedProduct(product);
+    setShowCalculator(true);
+  };
+
+  const handleCalculationComplete = (calculation: CoverageCalculation) => {
+    console.log('Coverage calculation:', calculation);
+  };
+
+  const filteredProducts = products.filter(product =>
+    product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.batchCode.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <SidebarProvider>
@@ -25,68 +110,106 @@ const InventoryPage = () => {
                 <Package className="w-6 h-6" />
                 <h1 className="text-lg font-semibold">Inventory Management</h1>
               </div>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700">
-                <Plus className="w-4 h-4" />
-                <span>Add Item</span>
-              </button>
+              <div className="flex items-center space-x-2">
+                <Button onClick={() => setShowCalculator(true)} variant="outline">
+                  <Calculator className="w-4 h-4 mr-2" />
+                  Coverage Calculator
+                </Button>
+                <Button className="bg-blue-600 text-white hover:bg-blue-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Product
+                </Button>
+              </div>
             </div>
           </header>
           
           <main className="flex-1 space-y-6 p-8 bg-gray-50">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold">Inventory Items</h2>
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Search inventory..."
-                      className="pl-10 pr-4 py-2 w-64 text-sm border border-gray-300 rounded-md"
+            <Tabs defaultValue="products" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="products">Products</TabsTrigger>
+                <TabsTrigger value="stock">Stock Levels</TabsTrigger>
+                <TabsTrigger value="movements">Stock Movements</TabsTrigger>
+                <TabsTrigger value="reports">Reports</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="products" className="space-y-6">
+                {showCalculator && selectedProduct && (
+                  <div className="mb-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold">Coverage Calculator - {selectedProduct.title}</h2>
+                      <Button onClick={() => setShowCalculator(false)} variant="outline">
+                        Close Calculator
+                      </Button>
+                    </div>
+                    <CoverageCalculator
+                      product={selectedProduct}
+                      onCalculationComplete={handleCalculationComplete}
                     />
                   </div>
-                  <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-md">
-                    <Filter className="w-4 h-4" />
-                    <span>Filter</span>
-                  </button>
-                </div>
-              </div>
+                )}
 
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">Item Name</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">Category</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">Stock</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">Unit</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">Price</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {inventoryItems.map((item) => (
-                      <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="py-3 px-4 font-medium">{item.name}</td>
-                        <td className="py-3 px-4 text-gray-600">{item.category}</td>
-                        <td className="py-3 px-4">{item.stock}</td>
-                        <td className="py-3 px-4 text-gray-600">{item.unit}</td>
-                        <td className="py-3 px-4">${item.price}</td>
-                        <td className="py-3 px-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            item.status === 'In Stock' ? 'bg-green-100 text-green-800' :
-                            item.status === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                            {item.status}
-                          </span>
-                        </td>
-                      </tr>
+                <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-semibold">Product Catalog</h2>
+                    <div className="flex items-center space-x-4">
+                      <div className="relative">
+                        <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+                        <Input
+                          type="text"
+                          placeholder="Search products..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="pl-10 w-64"
+                        />
+                      </div>
+                      <Button variant="outline">
+                        <Filter className="w-4 h-4 mr-2" />
+                        Filter
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredProducts.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        stockInfo={stockData[product.id]}
+                        onEdit={handleProductEdit}
+                        onView={handleProductView}
+                      />
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="stock">
+                <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                  <h2 className="text-xl font-semibold mb-6">Stock Levels Overview</h2>
+                  <div className="text-center text-gray-500 py-8">
+                    Stock levels overview coming soon...
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="movements">
+                <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                  <h2 className="text-xl font-semibold mb-6">Stock Movements</h2>
+                  <div className="text-center text-gray-500 py-8">
+                    Stock movements tracking coming soon...
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="reports">
+                <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                  <h2 className="text-xl font-semibold mb-6">Inventory Reports</h2>
+                  <div className="text-center text-gray-500 py-8">
+                    Inventory reports coming soon...
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </main>
         </SidebarInset>
       </div>

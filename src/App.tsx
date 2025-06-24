@@ -11,6 +11,7 @@ import POSPage from "./pages/POSPage";
 import DeliveryPage from "./pages/DeliveryPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import CRMPage from "./pages/CRMPage";
+import StockTakePage from "./pages/StockTakePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
